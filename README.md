@@ -12,10 +12,12 @@ daka(flag,accountid,password,address='广东省广州市天河区迎福路靠近
 | address  | str |打卡地址，默认广州校内|
 ## daka()方法返回值
 返回的是一个字典值
-|  code   | msg  |detail|
+|  参数   | 类型  |说明|
 |  ----  | ----  | ---- |
-| 0  | 打卡成功 |‘log’|
-| 1  | 打卡失败 |‘log’|
+| code  | int |打卡状态码，0是成功，其他都是失败|
+| msg | str |code的说明|
+|  detail   | str  |具体流程，操作日志信息|
+
 
 还有很多错误码 都是我编的 为的是与原本的程序返回格式统一
 
