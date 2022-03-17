@@ -37,13 +37,13 @@ detail返回的是具体的操作日志
 
 **推荐使用腾讯云免费的云函数**
 
-[腾讯云,点这里](https://cloud.tencent.com/)
+[腾讯云](https://cloud.tencent.com/)
 
-1.先注册腾讯云账号
+**1、先注册腾讯云账号**
 
-2、进到云函数控制台界面
+**2、进到云函数控制台界面**
 
-3、新建云函数
+**3、新建云函数**
 
 ![image](https://user-images.githubusercontent.com/88192911/158826265-75603d6c-ffca-4107-9bbf-950105498250.png)
 4、
