@@ -59,9 +59,11 @@ detail返回的是具体的操作日志
 6、打开在线编辑器终端
 
 依次输入命令 安装依赖
+
 **cd src**
 
 **pip install -r requirements.txt -t ./**
+
 ![image](https://user-images.githubusercontent.com/88192911/158831942-88c8a487-3479-4639-9d5a-8feeb6fe5f42.png)
 
 安装完成后 部署
