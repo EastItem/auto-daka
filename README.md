@@ -5,7 +5,7 @@
 
 ## daka()参数说明
 
-daka(flag,accountid,password,address='广东省广州市天河区迎福路靠近广东金融学院(广州校区)')
+daka(flag,accountid,password,address='')
 
 |  参数   | 类型  |说明|
 |  ----  | ----  | ---- |
