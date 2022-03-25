@@ -48,14 +48,13 @@ detail返回的是具体的操作日志
 **3、新建云函数**
 
 ![image](https://user-images.githubusercontent.com/88192911/158826265-75603d6c-ffca-4107-9bbf-950105498250.png)
-4、
 
-从头开始 --> 选择python3.6 --> 本地上传文件夹 -->上传github下载的文件 -->（解压后） 提交 --> 完成
+4、从头开始 --> 选择python3.6 --> 本地上传文件夹 -->上传github下载的文件 -->（解压后） 提交 --> 完成
+
 ![image](https://user-images.githubusercontent.com/88192911/158829870-f069c5db-306c-4acd-b1b7-638af6742cf7.png)
 
-5、
+5、函数管理 --> 函数配置 --> 执行超过时间改成90秒
 
-函数管理 --> 函数配置 --> 执行超过时间改成90秒
 ![image](https://user-images.githubusercontent.com/88192911/158827111-31e8e55b-65c3-48f1-8df8-78d61ee2bc2d.png)
 
 6、打开在线编辑器终端
