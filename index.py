@@ -35,14 +35,14 @@ def notifybyXtuis(sendKey='',notifyType=0,code=0,desp=''):
 
 	if code==0 and notifyType==2:
 		mydata={
-			'text':'打卡成功'，
+			'text':'打卡成功' ,
 			'desp':desp
 		    }
 		requests.post('http://wx.xtuis.cn/'+sendKey+'.send', data=mydata) 
 		
 	elif code!=0:
 		mydata={
-			'text':'打卡失败！'，
+			'text':'打卡失败！',
 			'desp':desp
 		    }
 		requests.post('http://wx.xtuis.cn/'+sendKey+'.send', data=mydata) 
