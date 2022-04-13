@@ -18,6 +18,6 @@ def notify(sendKey='',notifyType=0,code=0):
 
 	if code==0 and notifyType==2:
 		requests.get(url="https://sctapi.ftqq.com/"+sendKey+".send?title="+'Clock%20success')
-	else:
+	elif code!=0:
 		requests.get(url="https://sctapi.ftqq.com/"+sendKey+".send?title="+'Clock%20failed')
 	return 0
