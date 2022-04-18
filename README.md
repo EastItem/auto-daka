@@ -9,9 +9,7 @@
 
 ## 关于如何自动运行的方法
 
-**推荐使用腾讯云免费的云函数**
-
-[腾讯云](https://cloud.tencent.com/)
+**推荐使用[腾讯云](https://cloud.tencent.com/)免费的云函数**
 
 **1、先注册腾讯云账号**
 
@@ -29,7 +27,7 @@
 
 ![image](https://user-images.githubusercontent.com/88192911/158827111-31e8e55b-65c3-48f1-8df8-78d61ee2bc2d.png)
 
-6、打开在线编辑器终端（新建）
+6、打开在线编辑器终端（**新建终端**）
 
 依次输入命令 安装依赖
 
