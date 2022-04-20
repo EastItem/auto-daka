@@ -71,6 +71,7 @@
 ~~答：[Sever酱地址](https://sct.ftqq.com/upgrade?fr=sc)，进入页面后，微信登录并关注公众号。再按**Key&API选项**，复制SendKey，即可获取。~~
 
 **4、如何更新**
+  
   答：在腾讯云云函数中覆盖 yiban.py index.py 两个文件，并重新在index中填写信息，部署即可。
 
 ## daka()参数说明
