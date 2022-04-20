@@ -66,9 +66,9 @@
 关注公众号，即可获取！
 
 
-**3、关于Server酱微信提醒功能的key值获取**
+**~~3、关于Server酱微信提醒功能的key值获取~~（已弃用）**
 
-答：[Sever酱地址](https://sct.ftqq.com/upgrade?fr=sc)，进入页面后，微信登录并关注公众号。再按**Key&API选项**，复制SendKey，即可获取。
+~~答：[Sever酱地址](https://sct.ftqq.com/upgrade?fr=sc)，进入页面后，微信登录并关注公众号。再按**Key&API选项**，复制SendKey，即可获取。~~
 
 ## daka()参数说明
 
