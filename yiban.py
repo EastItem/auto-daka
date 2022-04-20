@@ -208,7 +208,7 @@ class person:
                     #print(name,'登录成功')
                     self.log=self.log+name+'登录成功\n'
                     self.loginToken=loginToken
-                    break
+                    return 0
                 else:
                     #print('密码错误')
                     self.log=self.log+'密码错误\n'
@@ -216,9 +216,11 @@ class person:
                 #print('登陆异常正在重试')
                 self.log=self.log+'登陆异常正在重试\n'
                 time.sleep(0.5)
+
         #print('登录异常')
         self.log=self.log+'登录异常\n'
         self.loginToken = None
+        return 1
 
     #登录加密方法
     def doCrypto(self):
@@ -254,7 +256,7 @@ class person:
         oauthUrl="https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946"
         if originUrl == oauthUrl:
             print("授权失效")
-            self.log += "授权失效"
+            self.log += "授权失效\n"
             #需要授权
             UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.2'
             header1={
@@ -292,7 +294,7 @@ class person:
             res = self.session.post(oauthUrl2, data=data1, headers=headers2).json()
             if res["code"]=="s200":
                 print("重新授权成功")
-                self.log += "重新授权成功"
+                self.log += "重新授权成功\n"
                 return 1
             else:
                 return 2
