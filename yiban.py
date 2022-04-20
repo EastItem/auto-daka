@@ -319,14 +319,14 @@ class person:
                 'text': '打卡成功!',
                 'desp': desp
             }
-            return   requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).text
+            return   requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
 
         elif code != 0:
             mydata = {
                 'text': '打卡失败！',
                 'desp': desp
             }
-            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).text
+            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
 
 #通过sever酱来提醒（此方法已暂停维护）
     #def notifybySeverJ(sendKey='', notifyType=0, code=0, desp=''):
