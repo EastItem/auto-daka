@@ -5,35 +5,37 @@ import requests
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
+
 class person:
-    def __init__(self,accountid,password,address='广东省广州市天河区迎福路靠近广东金融学院(广州校区)',token="",notifyType=1):
+    def __init__(self, accountid, password, address, token="", notifyType=1):
         self.accountid = accountid
         self.password = password
-        self.address=address
-        self.token=token
-        self.notifyType=notifyType
-
+        self.address = address
+        self.token = token
+        self.notifyType = notifyType
+        self.UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.2'
         self.reoauth = False
-
-        #打卡
-        self.res=self.daka()
+        self.log = ''
+        # 打卡
+        self.res = self.daka()
         print(self.res)
-        #推送
-        res2=self.notifybyXtuis()
+        # 推送
+        res2 = self.notifybyXtuis()
         print(res2)
+
     # 打卡主方法
     def daka(self):
         date = time.strftime("%Y-%m-%d", time.localtime())
-        self.log = '开始\n您的打卡地址为：'+self.address+'\n'
+        self.log = '开始\n您的打卡地址为：' + self.address + '\n'
 
         self.log = self.log + '登录中\n'
 
-        self.login() #登录
+        self.login()  # 登录
 
         if self.loginToken != None:
             output = self.post()
             self.log = self.log + date + output['msg'] + '\n'
-            self.log = self.log  + '结束\n\n'
+            self.log = self.log + '结束\n\n'
             output['detail'] = self.log
             return output
         else:
@@ -42,194 +44,198 @@ class person:
             resp['detail'] = self.log
             return resp
 
-    #登录并提交打卡方法
+    # 登录并提交打卡方法
     def post(self):
-        UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.2'
-        for i in range(3): #尝试3此打卡
+
+        for i in range(3):  # 尝试3此打卡
             time.sleep(0.5)
             date = time.strftime("%Y-%m-%d", time.localtime())
             self.session = requests.Session()
 
-            #第一次重定向
+            # 第一次重定向
             # 从 http://f.yiban.cn/iapp378946 到 http://f.yiban.cn/iapp/index?act=iapp378946
-            header1={
-            'Host': 'f.yiban.cn' ,
-            'Authorization': 'Bearer '+self.loginToken ,
-            'AppVersion': '5.0.2' ,
-            'Accept-Encoding': 'gzip, deflate' ,
-            'Accept-Language': 'zh-cn' ,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' ,
-            'loginToken': self.loginToken ,
-            'User-Agent':  UA,
-            'Connection': 'keep-alive' ,
-            'Upgrade-Insecure-Requests': '1',
-            'Cookie': 'client=iOS; loginToken='+self.loginToken
+            header1 = {
+                'Host': 'f.yiban.cn',
+                'Authorization': 'Bearer ' + self.loginToken,
+                'AppVersion': '5.0.2',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-cn',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'loginToken': self.loginToken,
+                'User-Agent': self.UA,
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Cookie': 'client=iOS; loginToken=' + self.loginToken
             }
-            url_1='http://f.yiban.cn/iapp378946'
+            url_1 = 'http://f.yiban.cn/iapp378946'
             try:
-                a = self.session.get(url=url_1,headers=header1,allow_redirects=False)
-                if "Location" not in a.headers :
-                    self.log=self.log+'易班服务器异常\n'
+                a = self.session.get(url=url_1, headers=header1, allow_redirects=False)
+                if "Location" not in a.headers:
+                    self.log = self.log + '易班服务器异常\n'
                     yb_result = {'code': 404, 'msg': '易班服务器异常'}
                     return yb_result
             except Exception:
-                self.log=self.log+'第一次重定向出错\n'
+                self.log = self.log + '第一次重定向出错\n'
                 continue
 
-            #第二次重定向
-            #从 http://f.yiban.cn/iapp/index?act=iapp378946 到 ygj判断授权界面
+            # 第二次重定向
+            # 从 http://f.yiban.cn/iapp/index?act=iapp378946 到 ygj判断授权界面
             url_2 = a.headers['Location']
-            header2={
-            'Host': 'f.yiban.cn' ,
-            'AppVersion': '5.0.2' ,
-            'Accept-Encoding': 'gzip, deflate' ,
-            'Accept-Language': 'zh-cn' ,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' ,
-            'loginToken': self.loginToken ,
-            'User-Agent':  UA,
-            'Connection': 'keep-alive' ,
-            'Upgrade-Insecure-Requests': '1'
+            header2 = {
+                'Host': 'f.yiban.cn',
+                'AppVersion': '5.0.2',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-cn',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'loginToken': self.loginToken,
+                'User-Agent': self.UA,
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
             }
             try:
-                b = self.session.get(url=url_2, headers=header2,allow_redirects=False)
+                b = self.session.get(url=url_2, headers=header2, allow_redirects=False)
                 if "Location" not in b.headers:
-                    self.log=self.log+'loginToken错误\n'
-                    yb_result= {'code': 555, 'msg': 'loginToken错误，请修改'}
+                    self.log = self.log + 'loginToken错误\n'
+                    yb_result = {'code': 555, 'msg': 'loginToken错误，请修改'}
                     return yb_result
             except Exception:
-                self.log=self.log+'第二次重定向出错\n'
+                self.log = self.log + '第二次重定向出错\n'
                 continue
 
-            #跳转到易广金 得到cookie
+            # 跳转到易广金 得到cookie
 
-            url_3=b.headers['Location']
-            #判断是否授权
-            judge=self.oauth(url_3)
-            if judge==1:
-                self.reoauth=True
+            url_3 = b.headers['Location']
+            # 判断是否授权
+            judge = self.oauth(url_3)
+            if judge == 1:
+                self.reoauth = True
                 continue
-            elif judge==2:
-                return {'code':111,'msg':"授权失败！"}
+            elif judge == 2:
+                return {'code': 111, 'msg': "授权失败！"}
 
-            header3={
-            'Host': 'ygj.gduf.edu.cn' ,
-            'AppVersion': '5.0.2' ,
-            'Accept-Encoding': 'gzip, deflate' ,
-            'Accept-Language': 'zh-cn' ,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' ,
-            'loginToken': self.loginToken ,
-            'User-Agent':  UA,
-            'Connection': 'keep-alive' ,
-            'Upgrade-Insecure-Requests': '1'
+            header3 = {
+                'Host': 'ygj.gduf.edu.cn',
+                'AppVersion': '5.0.2',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-cn',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'loginToken': self.loginToken,
+                'User-Agent': self.UA,
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
             }
             try:
-                c = self.session.get(url=url_3,headers=header3, allow_redirects=False)
+                c = self.session.get(url=url_3, headers=header3, allow_redirects=False)
                 # 拿到StudentID
                 studentID = c.headers['Location'].split('=')[1]
                 self.session.get(url=url_3, headers=header3)
             except Exception:
-                self.log=self.log+'第三次重定向出错\n'
+                self.log = self.log + '第三次重定向出错\n'
                 continue
 
+            # 获取历史打卡地址
+            if self.address=='自动':
+                # 失败
+                if self.getHistoryData(studentID)==1:
+                    return {'code': 555, 'msg': "获取地址失败！"}
 
-            #检查绑定
+            # 检查绑定
             url_bind = "https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice"
             self.session.get(url=url_bind, headers=header3)
 
-            #检查打卡记录 （暂不检测）
-            #url_check='https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getHealth'
-            #check_header={
-            #'Host': 'ygj.gduf.edu.cn' ,
-            #'Accept': '*/*' ,
-            #'X-Requested-With': 'XMLHttpRequest' ,
-            #'Accept-Language': 'zh-cn' ,
-            #'Accept-Encoding': 'gzip, deflate, br' ,
-            #'Content-Type': 'application/x-www-form-urlencoded' ,
-            #'Origin': 'https://ygj.gduf.edu.cn' ,
-            #'User-Agent': UA,
-            #'Connection': 'keep-alive' ,
-            #}
-            #check_data={
+            # 检查打卡记录 （暂不检测）
+            # url_check='https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getHealth'
+            # check_header={
+            # 'Host': 'ygj.gduf.edu.cn' ,
+            # 'Accept': '*/*' ,
+            # 'X-Requested-With': 'XMLHttpRequest' ,
+            # 'Accept-Language': 'zh-cn' ,
+            # 'Accept-Encoding': 'gzip, deflate, br' ,
+            # 'Content-Type': 'application/x-www-form-urlencoded' ,
+            # 'Origin': 'https://ygj.gduf.edu.cn' ,
+            # 'User-Agent': UA,
+            # 'Connection': 'keep-alive' ,
+            # }
+            # check_data={
             #    'studentID':studentID,
             #    'date':date
-            #}
-            #check=session.post(url=url_check,headers=check_header,data=check_data).json()
+            # }
+            # check=session.post(url=url_check,headers=check_header,data=check_data).json()
 
-            #判断今日是否已打卡
+            # 判断今日是否已打卡
             if True:
-                #打卡
+                # 打卡
                 url_save = "https://ygj.gduf.edu.cn/Handler/health.ashx?flag=save"
-                save_headers={
-                'Host': 'ygj.gduf.edu.cn' ,
-                'Accept': '*/*' ,
-                'X-Requested-With': 'XMLHttpRequest' ,
-                'Accept-Language': 'zh-cn' ,
-                'Accept-Encoding': 'gzip, deflate, br' ,
-                'Content-Type': 'application/x-www-form-urlencoded' ,
-                'Origin': 'https://ygj.gduf.edu.cn' ,
-                'User-Agent': UA,
-                'Connection': 'keep-alive' ,
+                save_headers = {
+                    'Host': 'ygj.gduf.edu.cn',
+                    'Accept': '*/*',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept-Language': 'zh-cn',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Origin': 'https://ygj.gduf.edu.cn',
+                    'User-Agent': self.UA,
+                    'Connection': 'keep-alive',
                 }
                 data_yb_save = {
-                          "studentID": studentID,
-                          "date":date,
-                          "health": "体温37.3℃以下（正常）",
-                          "address": self.address,
-                          "isTouch": "否",
-                          "isPatient": "不是"}
+                    "studentID": studentID,
+                    "date": date,
+                    "health": "体温37.3℃以下（正常）",
+                    "address": self.address,
+                    "isTouch": "否",
+                    "isPatient": "不是"}
                 try:
                     yb_result = self.session.post(url=url_save, headers=save_headers, data=data_yb_save).json()
-                    if self.reoauth==True:
-                        yb_result["code"]=999
+                    if self.reoauth == True:
+                        yb_result["code"] = 999
                     return yb_result
                 except Exception:
-                    self.log=self.log+'提交失败！\n'
-                    yb_result ={'code':411,'msg':"提交失败"}
+                    self.log = self.log + '提交失败！\n'
+                    yb_result = {'code': 411, 'msg': "提交失败"}
                     return yb_result
-            #else:
-                #yb_result = {'code': 0, 'msg': "今日已打卡"}
-                #return yb_result
-        return {'code':404,'msg':"打卡失败了"}
+            # else:
+            # yb_result = {'code': 0, 'msg': "今日已打卡"}
+            # return yb_result
+        return {'code': 404, 'msg': "打卡失败了"}
 
-
-    #登录接口方法
+    # 登录接口方法
     def login(self):
         for i in range(3):
             try:
                 LOGINURL = f'https://mobile.yiban.cn/api/v4/passport/login?mobile={self.accountid}&password={self.doCrypto()}&ct=2&identify=1'
                 reqHeaders = {"Origin": "https://c.uyiban.com",
-                "User-Agent": "Yiban-Pro",
-                "AppVersion": "5.0"}
+                              "User-Agent": "Yiban-Pro",
+                              "AppVersion": "5.0"}
                 loginRequest = requests.post(LOGINURL, headers=reqHeaders).json()
-                #登录成功后获取
+                # 登录成功后获取
                 if loginRequest is not None and str(loginRequest["response"]) == "100":
                     loginToken = loginRequest["data"]["access_token"]
-                    name=loginRequest['data']['user']['name']
-                    #print(name,'登录成功')
-                    self.log=self.log+name+'登录成功\n'
-                    self.loginToken=loginToken
+                    name = loginRequest['data']['user']['name']
+                    # print(name,'登录成功')
+                    self.log = self.log + name + '登录成功\n'
+                    self.loginToken = loginToken
                     return 0
                 else:
-                    #print('密码错误')
-                    self.log=self.log+'密码错误\n'
-            except Exception :
-                #print('登陆异常正在重试')
-                self.log=self.log+'登陆异常正在重试\n'
+                    # print('密码错误')
+                    self.log = self.log + '密码错误\n'
+            except Exception:
+                # print('登陆异常正在重试')
+                self.log = self.log + '登陆异常正在重试\n'
                 time.sleep(0.5)
 
-        #print('登录异常')
-        self.log=self.log+'登录异常\n'
+        # print('登录异常')
+        self.log = self.log + '登录异常\n'
         self.loginToken = None
         return 1
 
-    #登录加密方法
+    # 登录加密方法
     def doCrypto(self):
-            """
+        """
             v4接口
             密码加密
             Rsa,base64
             """
-            PUBLIC_KEY = '''-----BEGIN PUBLIC KEY-----
+        PUBLIC_KEY = '''-----BEGIN PUBLIC KEY-----
             MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA6aTDM8BhCS8O0wlx2KzA
             Ajffez4G4A/QSnn1ZDuvLRbKBHm0vVBtBhD03QUnnHXvqigsOOwr4onUeNljegIC
             XC9h5exLFidQVB58MBjItMA81YVlZKBY9zth1neHeRTWlFTCx+WasvbS0HuYpF8+
@@ -244,82 +250,108 @@ class person:
             ZRsH+P3+NNOZOEwUdjJUAx8CAwEAAQ==
             -----END PUBLIC KEY-----
             '''
-            encrypt = PKCS1_v1_5.new(RSA.importKey(PUBLIC_KEY))
-            Sencrypt = base64.b64encode(encrypt.encrypt(bytes(self.password, encoding="utf8")))
-            return parse.quote(Sencrypt.decode("utf-8"))
+        encrypt = PKCS1_v1_5.new(RSA.importKey(PUBLIC_KEY))
+        Sencrypt = base64.b64encode(encrypt.encrypt(bytes(self.password, encoding="utf8")))
+        return parse.quote(Sencrypt.decode("utf-8"))
 
-    #判断授权并进行授权的方法
-    def oauth(self,originUrl):
+    # 判断授权并进行授权的方法
+    def oauth(self, originUrl):
         "返回值为 0不需要授权 1授权成功 2授权失败"
 
-        #对重定向地址进行判断，如果地址为授权地址就需要授权，否则不需要
-        oauthUrl="https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946"
+        # 对重定向地址进行判断，如果地址为授权地址就需要授权，否则不需要
+        oauthUrl = "https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946"
         if originUrl == oauthUrl:
             print("授权失效")
             self.log += "授权失效\n"
-            #需要授权
-            UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.2'
-            header1={
-                    "Host": "oauth.yiban.cn",
-                    "Connection": "keep-alive",
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                    "loginToken": self.loginToken,
-                    "User-Agent": UA,
-                    "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-                    "Accept-Encoding": "gzip, deflate, br"
-                }
-            self.session.get(url=oauthUrl,headers=header1)
+            # 需要授权
+            header1 = {
+                "Host": "oauth.yiban.cn",
+                "Connection": "keep-alive",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "loginToken": self.loginToken,
+                "User-Agent": self.UA,
+                "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+                "Accept-Encoding": "gzip, deflate, br"
+            }
+            self.session.get(url=oauthUrl, headers=header1)
 
-            #进行授权
+            # 进行授权
             oauthUrl2 = 'https://oauth.yiban.cn/code/usersure'
             data1 = {
-                'client_id':"0b77c3ac53bd5c65",
-                'redirect_uri':"http://f.yiban.cn/iapp378946",
-                'state':"",
+                'client_id': "0b77c3ac53bd5c65",
+                'redirect_uri': "http://f.yiban.cn/iapp378946",
+                'state': "",
                 'display': "html",
                 'scope': '1,2,3,4,'
             }
             headers2 = {
-             "Host": "oauth.yiban.cn",
-             "Accept": "*/*",
-             "X-Requested-With": "XMLHttpRequest",
-             "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-             "Accept-Encoding": "gzip, deflate, br",
-             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-             "Origin": "https://oauth.yiban.cn",
-             "User-Agent": UA,
-             "Connection": "keep-alive",
-             "Referer": "https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946",
+                "Host": "oauth.yiban.cn",
+                "Accept": "*/*",
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Origin": "https://oauth.yiban.cn",
+                "User-Agent": self.UA,
+                "Connection": "keep-alive",
+                "Referer": "https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946",
             }
             res = self.session.post(oauthUrl2, data=data1, headers=headers2).json()
-            if res["code"]=="s200":
+            if res["code"] == "s200":
                 print("重新授权成功")
                 self.log += "重新授权成功\n"
                 return 1
             else:
                 return 2
         else:
-            #不需要授权
+            # 不需要授权
             return 0
 
-    #微信提示方法
+    # 获取历史打卡信息
+    def getHistoryData(self, studentID):
+        headers = {
+            "Host": "ygj.gduf.edu.cn",
+            "Accept": "*/*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Origin": "https://ygj.gduf.edu.cn",
+            "User-Agent": self.UA,
+            "Connection": "keep-alive",
+        }
+        data = {
+            "studentID": studentID
+        }
+        res = self.session.post(url="https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getHistoryList", data=data,
+                                headers=headers).json()
+        # 查询成功
+        if res['code'] == 0:
+            self.address = res['data'][0]['address']
+            self.log = self.log + "获取打卡地址成功\n打卡地址为:" + self.address + '\n'
+            return 0
+        else:
+            self.log = self.log + "获取打卡地址失败"
+            return 1
+
     def notifybyXtuis(self):
+        # 微信提示方法
         """
         sendKey：虾推啥的token，具体在虾推啥获取 http://www.xtuis.cn/
         notifyType：提醒类型，0不提醒，1仅失败，2全部提醒
         code：打卡状态码，0为成功，其他为失败
         """
-        code=self.res['code']
-        desp=self.log
+        code = self.res['code']
+        desp = self.log
         if len(self.token) == 0 or self.notifyType == 0:
-            return {"code":1,"msg":"未输入key或无需提醒"}
+            return {"code": 1, "msg": "未输入key或无需提醒"}
 
         if code == 0 and self.notifyType == 2:
             mydata = {
                 'text': '打卡成功!',
                 'desp': desp
             }
-            return   requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
+            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
 
         elif code != 0:
             mydata = {
@@ -328,19 +360,19 @@ class person:
             }
             return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
 
-#通过sever酱来提醒（此方法已暂停维护）
-    #def notifybySeverJ(sendKey='', notifyType=0, code=0, desp=''):
-    #    """
-    #    sendKey：Sever酱的sendkey，具体在 Sever酱网站获取 https://sct.ftqq.com/sendkey
-    #    notifyType：提醒类型，0不提醒，1仅失败，2全部提醒
-    #    code：打卡状态码，0为成功，其他为失败
-    #   """
-    #   if len(sendKey) == 0 or notifyType == 0:
-    #        print("未输入key或无需提醒")
-    #        return 1
-    #
-    #    if code == 0 and notifyType == 2:
-    #        requests.get(url="https://sctapi.ftqq.com/" + sendKey + ".send?title=" + 'Clock%20success')
-    #    elif code != 0:
-    #        requests.get(url="https://sctapi.ftqq.com/" + sendKey + ".send?title=" + 'Clock%20failed')
-    #    return 0
+# 通过sever酱来提醒（此方法已暂停维护）
+# def notifybySeverJ(sendKey='', notifyType=0, code=0, desp=''):
+#    """
+#    sendKey：Sever酱的sendkey，具体在 Sever酱网站获取 https://sct.ftqq.com/sendkey
+#    notifyType：提醒类型，0不提醒，1仅失败，2全部提醒
+#    code：打卡状态码，0为成功，其他为失败
+#   """
+#   if len(sendKey) == 0 or notifyType == 0:
+#        print("未输入key或无需提醒")
+#        return 1
+#
+#    if code == 0 and notifyType == 2:
+#        requests.get(url="https://sctapi.ftqq.com/" + sendKey + ".send?title=" + 'Clock%20success')
+#    elif code != 0:
+#        requests.get(url="https://sctapi.ftqq.com/" + sendKey + ".send?title=" + 'Clock%20failed')
+#    return 0
