@@ -38,9 +38,12 @@
 
 依次输入命令 安装依赖
 
-**cd src**
+```
+cd src
 
-**pip install -r requirements.txt -t ./**
+pip install -r requirements.txt -t ./
+
+```
 
 ![image](https://user-images.githubusercontent.com/88192911/158831942-88c8a487-3479-4639-9d5a-8feeb6fe5f42.png)
 
