@@ -5,7 +5,6 @@ import requests
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
-
 class person:
     def __init__(self, accountid, password, address, token="", notifyType=1):
         self.accountid = accountid
