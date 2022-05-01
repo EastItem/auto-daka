@@ -8,5 +8,6 @@ def main_handler(event, context):
 		#支持多人打卡
 	]
 
+	
 	for i in range(len(information)):
 		yiban.person(*information[i])
