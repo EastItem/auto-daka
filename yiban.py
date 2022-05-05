@@ -104,13 +104,7 @@ class person:
             # 跳转到易广金 得到cookie
 
             url_3 = b.headers['Location']
-            # 判断是否授权
-            judge = self.oauth(url_3)
-            if judge == 1:
-                self.reoauth = True
-                continue
-            elif judge == 2:
-                return {'code': 111, 'msg': "授权失败！"}
+
 
             header3 = {
                 'Host': 'ygj.gduf.edu.cn',
@@ -125,13 +119,20 @@ class person:
             }
             try:
                 c = self.session.get(url=url_3, headers=header3, allow_redirects=False)
-                # 拿到StudentID
-                studentID = c.headers['Location'].split('=')[1]
-                self.session.get(url=url_3, headers=header3)
             except Exception:
                 self.log = self.log + '第三次重定向出错\n'
                 continue
-
+                
+            # 判断是否授权
+            judge = self.oauth(c.headers['Location'])
+            if judge == 1:
+                self.reoauth = True
+                continue
+            elif judge == 2:
+                return {'code': 111, 'msg': "授权失败！"}
+            # 拿到StudentID
+            studentID = c.headers['Location'].split('=')[1]
+            
             # 获取历史打卡地址
             if self.address=='自动':
                 # 失败
@@ -304,6 +305,7 @@ class person:
                 return 2
         else:
             # 不需要授权
+            self.log += "无需授权\n"
             return 0
 
     # 获取历史打卡信息
