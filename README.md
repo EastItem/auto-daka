@@ -4,7 +4,8 @@
 **温馨提示： 请如实打卡，按时打卡。本代码只是代替每日重复的工作，如有异常请及时上报！**
 
 ## 关于如何获取deviceData、UA信息
- deviceData一定为
+
+ deviceData的格式一定为字典字符串，型如：
  
 ```
  
@@ -14,19 +15,19 @@
  
  **注意：单双引号不能弄反**
  
- 字典字符串
-
- 建议抓包获取！记得安装https证书。
+ 
+ 建议抓包获取！ios推荐使用stream，**记得安装https证书！！！**
+ 
+ **简易流程为：先登录易班==》开始抓包==》打开易广金==》点击健康打卡==》结束抓包==》抓到抓取内容为下面链接的==》复制UA==》复制表单提交内容**
  
  抓取的接口为： **https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice**
  
  获取请求头的UA以及提交的data表单信息。
- 
- 若不想抓包，也可以自行百度如何获取uuid，然后自行构造deviceData以及UA等信息
+ ```
+ UA型如：
+ "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.9"
+ ```
 
- **ps：可能可以缩减某些参数，例如UA，像上个版本一样，可能可以使用统一的UA，具体暂未尝试**
- 
- 
 ## 历史重大版本
 
    **v1.0 完成自动打卡**
@@ -88,13 +89,13 @@ pip install -r requirements.txt -t ./
   例如：
   
   ```
-  information=[["137123123","password","自动",'ASDASDAS123123','1'],
+  information=[["137123123","password", '{"appVersion":"5.0.9","deviceModel":"iPhone+X","systemVersion":"15.4.1","uuid":"123F123123D-6CE2-4035-BD75-D081231231"}',"Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.9",'ASDASDAS123123','1'],
                          
-                         ["121233","ASDWD123","具体地址"]]
+                         ["121233","ASDWD123", '{"appVersion":"5.0.9","deviceModel":"iPhone+X","systemVersion":"15.4.1","uuid":"123F123123D-6CE2-4035-BD75-D081231231"}',"Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.9"]]
                          
    ```
  
-上文即是两人打卡的例子，第一个人自动获取地址且需要失败提醒，第二个人固定打卡地址且不需要提醒 **(具体地址建议填写打卡记录中的地址)**。
+上文即是两人打卡的例子，第一个人自动获取地址且需要失败提醒，第二个人固定打卡地址且不需要提醒。
 
 8、设定自动启动时间
 
