@@ -6,11 +6,11 @@
 ## 关于如何获取deviceData、UA信息
  deviceData一定为
  
- '''
+```
  
  '{"appVersion":"5.0.9","deviceModel":"iPhone+X","systemVersion":"15.4.1","uuid":"123F123123D-6CE2-4035-BD75-D081231231"}'
  
- '''
+```
  
  **注意：单双引号不能弄反**
  
