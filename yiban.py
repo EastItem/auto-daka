@@ -6,15 +6,16 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
 class person:
-    def __init__(self, accountid, password, address, token="", notifyType=1):
+    def __init__(self, accountid, password,deviceModel,systemVersion,uuid,UA,token="", notifyType=1):
         self.accountid = accountid
         self.password = password
-        self.address = address
         self.token = token
         self.notifyType = notifyType
-        self.UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 yiban_iOS/5.0.2'
-        self.reoauth = False
-        self.log = ''
+        self.deviceinfo={"deviceModel":deviceModel,"systemVersion":systemVersion,"uuid":uuid}
+        self.UA = UA
+        self.reoauth = False #是否需要重新授权
+        self.log = '' #保存日志
+        self.session = requests.Session()
         # 打卡
         self.res = self.daka()
         print(self.res)
@@ -25,7 +26,7 @@ class person:
     # 打卡主方法
     def daka(self):
         date = time.strftime("%Y-%m-%d", time.localtime())
-        self.log = '开始\n您的打卡地址为：' + self.address + '\n'
+        self.log = '开始\n '
 
         self.log = self.log + '登录中\n'
 
@@ -45,26 +46,24 @@ class person:
 
     # 登录并提交打卡方法
     def post(self):
-
+        AppVersion='5.0.9'
         for i in range(3):  # 尝试3此打卡
             time.sleep(0.5)
             date = time.strftime("%Y-%m-%d", time.localtime())
-            self.session = requests.Session()
+            
 
             # 第一次重定向
             # 从 http://f.yiban.cn/iapp378946 到 http://f.yiban.cn/iapp/index?act=iapp378946
             header1 = {
                 'Host': 'f.yiban.cn',
                 'Authorization': 'Bearer ' + self.loginToken,
-                'AppVersion': '5.0.2',
-                'Accept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'zh-cn',
+                'AppVersion': AppVersion,
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'loginToken': self.loginToken,
                 'User-Agent': self.UA,
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Cookie': 'client=iOS; loginToken=' + self.loginToken
+                'Connection': 'keep-alive'
             }
             url_1 = 'http://f.yiban.cn/iapp378946'
             try:
@@ -82,14 +81,13 @@ class person:
             url_2 = a.headers['Location']
             header2 = {
                 'Host': 'f.yiban.cn',
-                'AppVersion': '5.0.2',
-                'Accept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'zh-cn',
+                'AppVersion': AppVersion,
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'loginToken': self.loginToken,
                 'User-Agent': self.UA,
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
+                'Connection': 'keep-alive'
             }
             try:
                 b = self.session.get(url=url_2, headers=header2, allow_redirects=False)
@@ -103,19 +101,18 @@ class person:
 
             # 跳转到易广金 得到cookie
 
-            url_3 = b.headers['Location']
+            url_3 = b.headers['Location'] #ygj.gduf.edu.cn/index.aspx?verify_request-.......
 
 
             header3 = {
                 'Host': 'ygj.gduf.edu.cn',
-                'AppVersion': '5.0.2',
-                'Accept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'zh-cn',
+                'AppVersion': AppVersion,
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'loginToken': self.loginToken,
                 'User-Agent': self.UA,
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
+                'Connection': 'keep-alive'
             }
             try:
                 c = self.session.get(url=url_3, headers=header3, allow_redirects=False)
@@ -124,43 +121,100 @@ class person:
                 continue
                 
             # 判断是否授权
-            judge = self.oauth(c.headers['Location'])
+            ygjhome=c.headers['Location']
+            judge = self.oauth(ygjhome)
             if judge == 1:
                 self.reoauth = True
                 continue
             elif judge == 2:
                 return {'code': 111, 'msg': "授权失败！"}
-            # 拿到StudentID
-            studentID = c.headers['Location'].split('=')[1]
             
-            # 获取历史打卡地址
-            if self.address=='自动':
-                # 失败
-                if self.getHistoryData(studentID)==1:
-                    return {'code': 555, 'msg': "获取地址失败！"}
+            # 拿到StudentID
+            studentID = ygjhome.split('=')[1]
+            
+            #进入易广金首页
+            self.session.get(url=ygjhome,headers=header3)
+            
+            #GetNotice
+            header_api={
+                'Host': 'ygj.gduf.edu.cn',
+                'Accept': '*/*',
+                "X-Requested-With": "XMLHttpRequest",
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Origin": "https://ygj.gduf.edu.cn",
+                'User-Agent': self.UA,
+                'Connection': 'keep-alive',
+                "Referer":ygjhome
+            }
+            notice=self.session.post(url='https://ygj.gduf.edu.cn/Handler/device.ashx?flag=getNotice',headers=header_api,data={'studentID':studentID}).json()
+            print(notice)
+            
+           
 
-            # 检查绑定
+            # 检查绑定设备
             url_bind = "https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice"
-            self.session.get(url=url_bind, headers=header3)
+            
+            #注意更换！！！！！！
+            devicedata={
+                "deviceData":'''{"appVersion":"5.0.9","deviceModel":'''+self.deviceinfo['deviceModel']+''',"systemVersion":'''+self.deviceinfo['systemVersion']+''',"uuid"'''+self.deviceinfo['uuid']+'''}''',
+                "autoBind":"false"
+            }
+            print(self.session.post(url=url_bind, headers=header_api,data=devicedata).json())
+            
+            #进入健康打卡页面
+            header_html={
+                'Host': 'ygj.gduf.edu.cn',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'User-Agent': self.UA,
+                'Connection': 'keep-alive',
+                "Referer":ygjhome
+            }
+            url_health='https://ygj.gduf.edu.cn/ygj/health/student-index.aspx'
+            self.session.get(url=url_health,headers=header_html)
 
-            # 检查打卡记录 （暂不检测）
-            # url_check='https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getHealth'
-            # check_header={
-            # 'Host': 'ygj.gduf.edu.cn' ,
-            # 'Accept': '*/*' ,
-            # 'X-Requested-With': 'XMLHttpRequest' ,
-            # 'Accept-Language': 'zh-cn' ,
-            # 'Accept-Encoding': 'gzip, deflate, br' ,
-            # 'Content-Type': 'application/x-www-form-urlencoded' ,
-            # 'Origin': 'https://ygj.gduf.edu.cn' ,
-            # 'User-Agent': UA,
-            # 'Connection': 'keep-alive' ,
-            # }
-            # check_data={
-            #    'studentID':studentID,
-            #    'date':date
-            # }
-            # check=session.post(url=url_check,headers=check_header,data=check_data).json()
+            #GetStudentInfo
+            header_api['Referer']=url_health
+            self.session.post(url='https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getStudentInfo',headers=header_api,data={"studentID":studentID})
+            
+             # 获取历史打卡地址
+            #if self.address=='自动':
+                # 失败
+            if self.getHistoryData(studentID)==1:
+                return {'code': 555, 'msg': "获取地址失败！"}
+            
+            #进入今日打卡界面
+            url_today="https://ygj.gduf.edu.cn/ygj/health/student-add.aspx"
+            header_html['Referer']=url_health
+            self.session.get(url=url_today,headers=header_html)
+            
+            
+            
+            # 检查打卡记录 
+            url_check='https://ygj.gduf.edu.cn/Handler/health.ashx?flag=getHealth'
+            check_header={
+             'Host': 'ygj.gduf.edu.cn' ,
+             'Accept': '*/*' ,
+             'X-Requested-With': 'XMLHttpRequest' ,
+             'Accept-Language': 'zh-CN,zh-Hans;q=0.9' ,
+             'Accept-Encoding': 'gzip, deflate, br' ,
+             'Content-Type': 'application/x-www-form-urlencoded' ,
+             'Origin': 'https://ygj.gduf.edu.cn' ,
+             'User-Agent': self.UA,
+             'Connection': 'keep-alive' ,
+             "Referer":url_today
+             }
+            check_data={
+                'studentID':studentID,
+                'date':date
+             }
+            self.session.post(url=url_check,headers=check_header,data=check_data).json()
+            
+
+
 
             # 判断今日是否已打卡
             if True:
@@ -170,20 +224,24 @@ class person:
                     'Host': 'ygj.gduf.edu.cn',
                     'Accept': '*/*',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Accept-Language': 'zh-cn',
+                    'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
                     'Accept-Encoding': 'gzip, deflate, br',
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Origin': 'https://ygj.gduf.edu.cn',
                     'User-Agent': self.UA,
                     'Connection': 'keep-alive',
+                    "Referer":"https://ygj.gduf.edu.cn/ygj/health/student-add.aspx"
                 }
                 data_yb_save = {
                     "studentID": studentID,
                     "date": date,
                     "health": "体温37.3℃以下（正常）",
-                    "address": self.address,
+                    "address": self.addressinfo['address'],
                     "isTouch": "否",
-                    "isPatient": "不是"}
+                    "isPatient": "不是",
+                    'latitude':self.addressinfo['latitude'],
+                    'longitude':self.addressinfo['longitude'],
+                    "autoAddress":'1'}
                 try:
                     yb_result = self.session.post(url=url_save, headers=save_headers, data=data_yb_save).json()
                     if self.reoauth == True:
@@ -206,7 +264,7 @@ class person:
                 reqHeaders = {"Origin": "https://c.uyiban.com",
                               "User-Agent": "Yiban-Pro",
                               "AppVersion": "5.0"}
-                loginRequest = requests.post(LOGINURL, headers=reqHeaders).json()
+                loginRequest = self.session.post(LOGINURL, headers=reqHeaders).json()
                 # 登录成功后获取
                 if loginRequest is not None and str(loginRequest["response"]) == "100":
                     loginToken = loginRequest["data"]["access_token"]
@@ -218,8 +276,8 @@ class person:
                 else:
                     # print('密码错误')
                     self.log = self.log + '密码错误\n'
-            except Exception:
-                # print('登陆异常正在重试')
+            except Exception as e:
+                print('出现异常'+repr(e))
                 self.log = self.log + '登陆异常正在重试\n'
                 time.sleep(0.5)
 
@@ -328,8 +386,8 @@ class person:
                                 headers=headers).json()
         # 查询成功
         if res['code'] == 0:
-            self.address = res['data'][0]['address']
-            self.log = self.log + "获取打卡地址成功\n打卡地址为:" + self.address + '\n'
+            self.addressinfo = res['data'][0]
+            self.log = self.log + "获取打卡地址成功\n打卡地址为:" + self.addressinfo['address'] + '\n'
             return 0
         else:
             self.log = self.log + "获取打卡地址失败"
@@ -352,14 +410,14 @@ class person:
                 'text': '打卡成功!',
                 'desp': desp
             }
-            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
+            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json()
 
         elif code != 0:
             mydata = {
                 'text': '打卡失败！',
                 'desp': desp
             }
-            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json
+            return requests.post('http://wx.xtuis.cn/' + self.token + '.send', data=mydata).json()
 
 # 通过sever酱来提醒（此方法已暂停维护）
 # def notifybySeverJ(sendKey='', notifyType=0, code=0, desp=''):
