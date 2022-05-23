@@ -6,12 +6,12 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
 class person:
-    def __init__(self, accountid, password,deviceModel,systemVersion,uuid,UA,token="", notifyType=1):
+    def __init__(self, accountid, password,deviceData,UA,token="", notifyType=1):
         self.accountid = accountid
         self.password = password
         self.token = token
         self.notifyType = notifyType
-        self.deviceinfo={"deviceModel":deviceModel,"systemVersion":systemVersion,"uuid":uuid}
+        self.deviceData=deviceData
         self.UA = UA
         self.reoauth = False #是否需要重新授权
         self.log = '' #保存日志
@@ -156,11 +156,12 @@ class person:
             # 检查绑定设备
             url_bind = "https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice"
             
-            #注意更换！！！！！！
+            
             devicedata={
-                "deviceData":'''{"appVersion":"5.0.9","deviceModel":'''+self.deviceinfo['deviceModel']+''',"systemVersion":'''+self.deviceinfo['systemVersion']+''',"uuid"'''+self.deviceinfo['uuid']+'''}''',
+                "deviceData":self.deviceData,
                 "autoBind":"false"
             }
+
             print(self.session.post(url=url_bind, headers=header_api,data=devicedata).json())
             
             #进入健康打卡页面
