@@ -3,8 +3,18 @@
 
 **温馨提示： 请如实打卡，按时打卡。本代码只是代替每日重复的工作，如有异常请及时上报！**
 
-## 关于如何获取UA、UUID、设备型号、系统版本等信息
+## 关于如何获取deviceData、信息
+ 建议为 '{"appVersion":"5.0.9","deviceModel":"iPhone+X","systemVersion":"15.4.1","uuid":"123F123123D-6CE2-4035-BD75-D081231231"}'
+ 
+ 字典字符串
+
  建议抓包获取！记得安装https证书。
+ 
+ 抓取的接口为： **https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice**
+ 
+ 获取请求头的UA以及提交的data表单信息。
+ 
+ 若不想抓包，也可以自行百度如何获取uuid，然后自行构造deviceData以及UA等信息
 
 ## 历史重大版本
 
