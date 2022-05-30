@@ -18,6 +18,8 @@
  
  建议抓包获取！ios推荐使用stream，**记得安装https证书！！！**
  
+ 安卓查看：[issues](https://github.com/EastItem/auto-daka/issues/4)
+ 
  **简易流程为：先登录易班==》开始抓包==》打开易广金==》点击健康打卡==》结束抓包==》抓到抓取内容为下面链接的==》复制UA==》复制表单提交内容**
  
  抓取的接口为： **https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice**
