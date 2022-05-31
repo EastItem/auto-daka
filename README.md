@@ -20,9 +20,9 @@
  
  安卓查看：[issues](https://github.com/EastItem/auto-daka/issues/4)
  
- **简易流程为：先登录易班==》开始抓包==》打开易广金==》点击健康打卡==》结束抓包==》抓到抓取内容为下面链接的==》复制UA==》复制表单提交内容**
+ **简易流程为：先登录易班==》开始抓包==》打开易广金==》点击健康打卡==》结束抓包==》查看刚刚抓包历史记录==》找到请求链接为https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice的请求==》复制请求头的User-Agent==》同时复制提交表单的内容**
  
- 抓取的接口为： **https://ygj.gduf.edu.cn/Handler/device.ashx?flag=checkBindDevice**
+
  
  获取请求头的UA以及提交的data表单信息。
  ```
