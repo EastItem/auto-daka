@@ -46,7 +46,7 @@ class person:
 
     # 登录并提交打卡方法
     def post(self):
-        AppVersion='5.0.9'
+        AppVersion='5.0.10'
         for i in range(3):  # 尝试3此打卡
             time.sleep(0.5)
             date = time.strftime("%Y-%m-%d", time.localtime())
@@ -115,13 +115,17 @@ class person:
                 'Connection': 'keep-alive'
             }
             try:
-                c = self.session.get(url=url_3, headers=header3, allow_redirects=False)
+                c = self.session.get(url=url_3, headers=header3)
             except Exception:
                 self.log = self.log + '第三次重定向出错\n'
                 continue
                 
             # 判断是否授权
-            ygjhome=c.headers['Location']
+            # "<script>window.location.href='/ygj/student-default.aspx?studentID=123'</script>"
+            try:
+                ygjhome="https://ygj.gduf.edu.cn"+c.text.split("href=")[1].split("<")[0].replace("'","")
+            except:
+                ygjhome="https://oauth.yiban.cn/code/html?client_id=0b77c3ac53bd5c65&redirect_uri=http://f.yiban.cn/iapp378946"
             judge = self.oauth(ygjhome)
             if judge == 1:
                 self.reoauth = True
@@ -133,7 +137,19 @@ class person:
             studentID = ygjhome.split('=')[1]
             
             #进入易广金首页
-            self.session.get(url=ygjhome,headers=header3)
+            header_home={
+                'Host': 'ygj.gduf.edu.cn',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Connection': 'keep-alive',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
+                'User-Agent': self.UA,
+                "Referer":url_3
+            }
+            
+            
+            
+            self.session.get(url=ygjhome,headers=header_home)
             
             #GetNotice
             header_api={
@@ -148,7 +164,7 @@ class person:
                 'Connection': 'keep-alive',
                 "Referer":ygjhome
             }
-            notice=self.session.post(url='https://ygj.gduf.edu.cn/Handler/device.ashx?flag=getNotice',headers=header_api,data={'studentID':studentID}).json()
+            notice=self.session.post(url='https://ygj.gduf.edu.cn/Handler/device.ashx?flag=getNotice',headers=header_api,data={"studentID":studentID}).json()
             print(notice)
             
            
@@ -161,9 +177,8 @@ class person:
                 "deviceData":self.deviceData,
                 "autoBind":"false"
             }
-
-            print(self.session.post(url=url_bind, headers=header_api,data=devicedata).json())
             
+            print(self.session.post(url=url_bind, headers=header_api,data=devicedata))
             #进入健康打卡页面
             header_html={
                 'Host': 'ygj.gduf.edu.cn',
